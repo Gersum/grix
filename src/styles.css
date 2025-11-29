@@ -1,1 +1,79 @@
 /* You can add global styles to this file, and also import other style files */
+/* @import "~aos/dist/aos.css"; */
+@import "tailwindcss";
+
+
+
+@keyframes tickerSingle {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-x {
+  0% { transform: translateX(-10px); opacity: 0.5; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes moveup {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.marquee-container {
+  --ticker-speed: 12; /* Adjust this for speed: higher = slower */
+  overflow: hidden;
+  width: 100%;
+}
+.marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation-name: tickerSingle;
+  animation-duration: calc(1s * var(--ticker-speed));
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  will-change: transform;
+}
+.marquee-word {
+  display: inline-block;
+  margin-right: 2rem;
+  font-size: 10rem; /* Make words big */
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 2px 2px 8px #000;
+}
+
+/* Responsive font size */
+@media (max-width: 768px) {
+  .marquee-word {
+    font-size: 7rem; /* Adjust for smaller screens */
+  }
+}
+
+
+.marquee-glow {
+  text-shadow: 0 0 8px #fff, 0 0 16px #fff;
+}
+.group-hover\:animate-marquee-x:hover {
+  animation: marquee-x 0.8s cubic-bezier(0.4,0,0.2,1) both;
+}
+.animate-moveup {
+  animation: moveup 0.8s cubic-bezier(0.4,0,0.2,1) both;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.card-animate {
+  opacity: 0;
+  transform: translateY(40px);
+}
+.marquee-outline-hover {
+  transition: color 0.3s;
+}
+.marquee-outline-hover:hover {
+  color: transparent !important;
+  -webkit-text-stroke: 2px #fff;
+  text-stroke: 2px #fff;
+}
+
