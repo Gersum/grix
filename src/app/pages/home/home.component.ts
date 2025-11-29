@@ -15,6 +15,13 @@ import {
 import { RouterModule } from '@angular/router';
 import * as AOS from 'aos';
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -30,7 +37,7 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
   @ViewChild('heroCanvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChildren('card', { read: ElementRef }) cardElements!: QueryList<ElementRef>;
 
-  @ViewChild('featuredVideo') featuredVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('youtubePlayer') youtubePlayer!: ElementRef<HTMLIFrameElement>;
   isPlaying = true;
   isMuted = true;
 
@@ -47,6 +54,7 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
   currentFrame = 0;
   imagesLoaded = 0;
   private canvasContext: CanvasRenderingContext2D | null = null;
+  private player: any = null;
 
   showCarousel = false; // Initially hidden
   carouselDone = false;
@@ -75,21 +83,23 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
   constructor(private renderer: Renderer2) { }
 
   togglePlayPause() {
-    const video = this.featuredVideo.nativeElement;
-    if (video.paused) {
-      video.play();
-      this.isPlaying = true;
-    } else {
-      video.pause();
-      this.isPlaying = false;
+    if (this.player) {
+      this.isPlaying ? this.player.pauseVideo() : this.player.playVideo();
     }
   }
 
   toggleMute() {
-    const video = this.featuredVideo.nativeElement;
-    video.muted = !video.muted;
-    this.isMuted = video.muted;
+    if (this.player) {
+      if (this.isMuted) {
+        this.player.unMute();
+      } else {
+        this.player.mute();
+      }
+      this.isMuted = !this.isMuted;
+    }
   }
+
+
 
   works = [
     {
@@ -235,8 +245,13 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
 
   ngAfterViewInit() {
     // Initialize Canvas
+
     if (this.canvasRef?.nativeElement) {
-      this.canvasContext = this.canvasRef.nativeElement.getContext('2d');
+      const canvas = this.canvasRef.nativeElement;
+
+      // This line is now safe — no more ts(2531)
+      this.canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D;
+
       this.resizeCanvas();
       this.currentFrame = 0;
       this.renderFrame(this.currentFrame);
@@ -255,6 +270,31 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
       window.addEventListener('resize', () => this.resizeCanvas());
       this.preloadImages();
     }
+
+
+
+    // === FINAL FIXED YOUTUBE PLAYER – MUTED BY DEFAULT + FULL CONTROL ===
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      this.player = new (window as any).YT.Player('youtubePlayer', {
+        events: {
+          onReady: (event: any) => {
+            const player = event.target;
+            player.mute();           // Force muted
+            player.playVideo();      // Autoplay
+            this.isMuted = true;     // Sync our button state
+          },
+          onStateChange: (event: any) => {
+            this.isPlaying = event.data === (window as any).YT.PlayerState.PLAYING;
+          }
+        }
+      });
+    };
 
     // Initialize IntersectionObserver only after the first scroll
     setTimeout(() => {
@@ -281,10 +321,26 @@ export class HomeComponent implements AfterViewInit, OnInit, AfterViewChecked, O
     }, 500); // Delay the initialization
 
 
-    if (this.featuredVideo?.nativeElement) {
-      this.featuredVideo.nativeElement.muted = true;
-      this.featuredVideo.nativeElement.play();
+    // === YOUTUBE PLAYER INITIALIZATION ===
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
     }
+
+    window.onYouTubeIframeAPIReady = () => {
+      this.player = new (window as any).YT.Player('youtubePlayer', {
+        events: {
+          onReady: (event: any) => {
+            event.target.mute();
+            event.target.playVideo();
+          },
+          onStateChange: (event: any) => {
+            this.isPlaying = event.data === (window as any).YT.PlayerState.PLAYING;
+          }
+        }
+      });
+    };
 
     this.updateMarqueeMaxScroll();
     this.autoScrollActive = true;

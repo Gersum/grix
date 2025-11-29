@@ -160,56 +160,59 @@
   </div>
 </section>
 
-<!-- Video Section Below Gallery -->
-<section class="w-full min-h-screen bg-black flex items-center justify-center py-20 px-7">
-  <div class="w-full max-w-4xl flex flex-col items-center">
-    <h2 class="text-white text-3xl font-bold mb-8 text-center">Featured Video</h2>
-    <div
-      class="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl flex items-center justify-center relative">
-      <video #featuredVideo src="./vid2.mp4" class="w-full h-full object-cover bg-black" autoplay muted playsinline>
-        Your browser does not support the video tag.
-      </video>
-      <!-- Play/Pause Button -->
-      <button type="button"
-        class="absolute bottom-6 left-6 bg-white/80 hover:bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition"
-        (click)="togglePlayPause()">
-        <ng-container *ngIf="!isPlaying; else pauseIcon">
-          <!-- Play Icon -->
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 30 30">
-            <polygon points="6,4 17,10 6,16" />
+<!-- Featured Video Section – Muted by default + working controls -->
+<section class="w-full min-h-screen bg-black flex items-center justify-center py-24 px-7">
+  <div class="w-full max-w-6xl flex flex-col items-center">
+    <h2 class="text-white text-4xl md:text-5xl font-bold mb-12 text-center">Featured Video</h2>
+
+    <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative">
+
+      <!-- YouTube Player -->
+      <iframe #youtubePlayer id="youtubePlayer" class="w-full h-full"
+        src="https://www.youtube.com/embed/tphyy-5cCB4?autoplay=1&mute=1&loop=1&playlist=tphyy-5cCB4&controls=0&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1"
+        title="Featured Video" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+
+      <!-- Clean Minimal Controls – Bottom Left -->
+      <div class="absolute bottom-6 left-6 flex flex-col gap-4">
+
+        <!-- Play/Pause -->
+        <button (click)="togglePlayPause()"
+          class="bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full w-16 h-16 flex items-center justify-center shadow-2xl transition-all hover:scale-110">
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+            <ng-container *ngIf="!isPlaying; else pause">
+              <path d="M8 5v14l11-7L8 5z" />
+            </ng-container>
+            <ng-template #pause>
+              <path d="M6 4h4v16H6z M14 4h4v16h-4z" />
+            </ng-template>
           </svg>
-        </ng-container>
-        <ng-template #pauseIcon>
-          <!-- Pause Icon -->
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <rect x="6" y="4" width="2.5" height="12" rx="1" />
-            <rect x="11.5" y="4" width="2.5" height="12" rx="1" />
+        </button>
+
+        <!-- Mute/Unmute – NOW 100% WORKING & MUTED BY DEFAULT -->
+        <button (click)="toggleMute()"
+          class="bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full w-16 h-16 flex items-center justify-center shadow-2xl transition-all hover:scale-110">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <ng-container *ngIf="isMuted; else unmuted">
+              <!-- Muted Icon -->
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              <line x1="2" y1="2" x2="22" y2="22" stroke-width="3" />
+            </ng-container>
+            <ng-template #unmuted>
+              <!-- Unmuted Icon -->
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </ng-template>
           </svg>
-        </ng-template>
-      </button>
-      <!-- Mute/Unmute Button -->
-      <button type="button"
-        class="absolute bottom-6 right-6 bg-white/80 hover:bg-white text-black rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition"
-        (click)="toggleMute()">
-        <ng-container *ngIf="isMuted; else unmuteIcon">
-          <!-- Muted Icon -->
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M9 9L5 13H2v-2h3l4-4v8l-4-4H2v2h3l4 4V9z" />
-            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" />
-          </svg>
-        </ng-container>
-        <ng-template #unmuteIcon>
-          <!-- Unmuted Icon -->
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M9 9L5 13H2v-2h3l4-4v8l-4-4H2v2h3l4 4V9z" />
-            <path d="M15 9.34v5.32a3 3 0 0 0 0-5.32z" />
-          </svg>
-        </ng-template>
-      </button>
+        </button>
+
+      </div>
     </div>
   </div>
 </section>
-
 <!-- Why Us Section -->
 <section #whyUsSection class="w-full min-h-screen bg-black flex items-center justify-center">
   <div
@@ -315,7 +318,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h8" />
               </svg>
             </ng-container>
-            <div class="text-base sm:text-xl font-semibold mb-1 sm:mb-2 text-white text-center">{{ client.name }}</div>
+            <div class="text-base sm:text-xl font-semibold mb-1 sm:mb-2 text-white text-center">{{ client.name }}
+            </div>
             <div class="text-xs sm:text-sm text-white text-center">{{ client.desc }}</div>
           </div>
         </div>
@@ -329,7 +333,8 @@
     class="bg-black shadow-2xl  w-full max-w-full min-h-full flex flex-col md:flex-row md:items-center md:justify-between px-4 sm:px-10 py-10 mb-8 gap-8">
     <!-- Brand and description -->
     <div class="flex-1 flex flex-col items-center md:items-start gap-2">
-      <div class="text-3xl md:text-4xl font-extrabold text-white tracking-wide mb-2 text-center md:text-left">GRIX</div>
+      <div class="text-3xl md:text-4xl font-extrabold text-white tracking-wide mb-2 text-center md:text-left">GRIX
+      </div>
       <div class="text-gray-300 text-base md:text-lg text-center md:text-left max-w-xl">
         Culture-driven, creative and competitive.<br>
         We build brands, products, and experiences for the digital age.
